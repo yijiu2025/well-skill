@@ -1,0 +1,67 @@
+# 更新日志
+
+本文件记录 fullstack-rules 的所有重要变更。
+
+格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
+
+## [1.1.0] - 2026-07-20
+
+### 新增
+
+- **AI 行为准则**：约束 AI 修改代码时的行为（先读后改、不改无关代码、不确定先问等）
+- **反例速查表**：10 个常见场景的正反例对照（API 请求、错误处理、类型、SQL、提交等）
+- **E2E 测试规范**：Playwright 测试模板、原则、运行命令
+- **CSRF 防护规范**：原理、4 种防护措施、Fastify 配置、前端配合
+- **环境变量管理**：文件层级、命名规范、维护规则
+- **版本号管理**：SKILL.md frontmatter 中添加 version 字段
+
+### 改进
+
+- **SKILL.md**：新增"AI 行为准则"和"反例速查"章节，提升可执行性
+- **note.md**：新增注释反例（4处）和错误处理反例（4处）
+- **naming-convention.md**：新增命名反例段（JS变量、常量、文件命名）
+- **security.md**：章节从九章扩展为十章，新增 CSRF 和环境变量管理
+- **testing.md**：章节从五章扩展为六章，新增 E2E 测试
+- **git-patterns.md**：新增提交信息反例（无意义信息、多改动合并等）
+- **frontend/main.md**：新增组件反例（3处）和数据加载反例（2处）
+- **backend/main.md**：从 31 行扩充为完整规范（分层架构/响应格式/数据库规范）
+- **vue.md**：新增 TypeScript 严格模式配置表
+- **AGENTS.md**：精简重复内容，添加引用链接
+
+### 评分提升
+
+- 综合评分从 7.18 提升至 8.70（+1.52）
+- 反例覆盖从 0 处增至 24 处
+- 文件总量从 2363 行优化至 1847 行（-22%）
+
+## [1.0.0] - 2026-07-18
+
+### 新增
+
+- **核心铁律**：8 条基本规则（DRY、文件大小、模块边界、禁止 emoji 等）
+- **模块边界规则**：职责单一、不内嵌其他模块、状态归属、跨模块通信、禁止反向依赖
+- **图标使用规范**：禁止 UI 使用 emoji、优先使用 lucide-vue-next
+- **修复问题原则**：先分析再修改，禁止盲目尝试
+- **输出格式要求**：思考过程、代码输出、依赖说明、修改后验证
+
+### 规范文档
+
+- **note.md**：注释规范（文件头/函数/行内/日志）
+- **naming-convention.md**：命名规范（代码/文件/DB/权限/API/Git）
+- **git-patterns.md**：Git 规范（分支/提交/CR/版本号）
+- **security.md**：安全规范（XSS/SQL注入/权限/认证）
+- **testing.md**：测试规范（Jest/Vitest/覆盖率）
+- **frontend/main.md**：前端通用规范
+- **frontend/web/vue.md**：Vue 3 专用规范
+- **backend/main.md**：后端通用规范
+- **backend/nodejs/nodejs-fastify.md**：Fastify 代码模板
+- **new-project.md**：新项目初始化流程
+
+### 代码模板
+
+- API 路由模板
+- DAO 模板
+- 模型模板
+- 迁移文件模板
+- 序列化函数模板
+- Loader 注册模板
