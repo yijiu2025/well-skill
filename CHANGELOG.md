@@ -4,6 +4,14 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.1.1] - 2026-07-21
+
+### 修复
+
+- **naming-convention.md**：修正 Composables 文件命名规则冲突（hooks/ 目录用 camelCase，其他工具文件用 kebab-case），新增例外说明
+- **nodejs-fastify.md**：模型模板 `paranoid: true` → `paranoid: false`，与自定义 `delete_version` 软删除模式保持一致
+- **note.md**：移除错误处理反例（不属于注释规范范畴，已在 security.md 和 nodejs-fastify.md 中覆盖）
+
 ## [1.1.0] - 2026-07-20
 
 ### 新增
