@@ -4,6 +4,14 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.4.0] - 2026-09-05
+
+### 新增
+
+- **推荐技能目录与 AI 自安装**：orchestration.md 新增可信技能目录（安全白盒/API/OWASP/渗透/修复回归/CI/Redis 专题/UI 设计/元技能/浏览器/移动端）
+- **install-skill.mjs 自安装脚本**：浅克隆 → SKILL.md 完整性校验 → 强制人工安全审查提醒（仅接受 github https 来源，防供应链注入）
+- doctor.mjs 禁用模式扫描覆盖脚本文件，CHANGELOG 历史记录豁免
+
 ## [2.3.0] - 2026-09-05
 
 ### 新增

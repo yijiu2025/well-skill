@@ -1,111 +1,128 @@
 ---
 name: fullstack-rules
-version: 1.1.0
-description: 前后端全栈开发规范，涵盖项目结构、命名约定、API设计、数据库、安全、测试和部署。当用户进行全栈开发、创建新项目、编写前后端代码、设计API或审查代码质量时自动触发。
+version: 2.4.0
+description: 前后端全栈开发规范。涵盖：创建项目、新增App、写API、写页面、调外部接口、修复Bug、代码审查。每次触发时，必须按以下顺序执行：① 有外部 API 的先 curl 验证格式 ② 写后端路由 ③ curl 验证后端 ④ 写前端 ⑤ 验证全链路。禁止假数据，禁止半截功能。审查代码时执行企业级审查清单。代码审查模式：无需执行①-⑤，直接执行审查清单。
 type: prompt
-whenToUse: 当用户进行全栈开发、创建新项目、编写前后端代码、设计API接口、进行代码审查、或需要遵循团队开发规范时
-arguments:
-  - techStack
-  - scope
+whenToUse: 用户涉及本仓库前后端代码操作时触发：创建新项目、新增业务模块、编写前后端代码、设计API接口、审查代码质量、修复Bug、开发新功能、调用外部API、对接第三方数据、创建Vue页面、编写Node.js后端、设计数据库模型、配置路由、测试接口。涉及 KX 架构文件 / .kx / 页面描述语言时，按需加载 references/kx.md。
 ---
 
 # 编码规范
 
 ## 核心铁律
 
-1. **DRY 原则**: 拒绝重复代码，合理抽取公共组件和工具函数。
-2. **单个文件 ≤ 1000 行**（含空行注释）。接近 700 行主动拆分。
+### 开发一个功能的固定执行顺序
+
+必须严格按以下顺序执行，**禁止跳步、禁止猜测、禁止假数据**：
+
+```
+0. 涉及新项目/新 App → 先走需求确认流程（references/requirement-intake.md），
+   输出需求文档 → 多轮提问确认 → 创建 KX 架构文件（references/kx.md）
+1. 有外部 API 的 → 先 curl 验证返回格式（确认字段名和类型）
+2. 写后端 API 路由（system.json → route → DAO/Service）
+3. curl 验证后端 API 返回数据（状态码 + 数据结构）
+4. 写前端页面和 API 调用
+5. 验证全链路（浏览器或 curl 确认数据正常展示）
+```
+
+> 高频任务有**端到端剧本**（新增 API / 新增页面 / 对接外部 API / 修 Bug / 代码审查 / 安全审查）：
+> 按 [workflows.md](references/workflows.md) 剧本逐步执行，剧本内含各阶段验收清单。
+> 修 Bug 前先扫 [pitfalls.md](references/pitfalls.md) 事故复盘库——确认不是历史事故的同型问题。
+> 攻击面大的模块合入前，按 [orchestration.md](references/orchestration.md) 编排安全类专项 skill 做深度扫描。
+
+## 开发规范
+
+1. **DRY 原则**：拒绝重复代码，合理抽取公共组件和工具函数。
+2. **单个文件 ≤ 1000 行**（含空行注释）；接近 400 行主动规划拆分。
 3. **一个文件 = 一个模块**。组件 A 不内嵌组件 B 的 UI/逻辑；前端跨模块用 props/emit/v-model/composable 通信。
-4. **UI 禁止 emoji 图标**。所有 UI 图标用图标库或内联SVG。控制台日志 emoji 前缀不受限。
+4. **UI 禁止 emoji 图标**。所有 UI 图标用图标库或内联 SVG（优先 `lucide-vue-next`）。控制台日志 emoji 前缀不受限。
 5. **修改现有代码前先说明计划**；不确定的业务逻辑先提问再写。
-6. **每个函数写文档注释**；注释和文档用简体中文,函数必须包含 JSDoc/Docstring 格式的参数和返回值说明。
-7. **错误处理**: 不要吞噬异常，所有错误必须被捕获并记录日志。
-8. **每次修改代码后主动提交 git**，更新 commit 信息。git规范文件：[Git Commit Message Convention](references/git-patterns.md)
-
-### 模块边界规则（核心铁律第3条展开）
-
-| 规则 | 说明 | 示例 |
-|:---|:---|:---|
-| **职责单一** | 一个组件只负责一个功能域 | 搜索组件只管搜索框，不管分类 Tab |
-| **不内嵌其他模块** | 组件 A 中不出现组件 B 的 UI/逻辑 | 列表页里的 Tab 不应写在搜索组件里 |
-| **状态归属** | 由消费方（父组件）管理状态，不内嵌数据 | Tab 切换状态属于列表页，不属于搜索组件 |
-| **跨模块通信** | 通过 props / emit / v-model / 共享 composable | 子组件需要数据 → props；需要通知 → emit |
-| **禁止反向依赖** | 子组件不依赖父组件的内部结构 | 搜索组件不应知道列表页的存在 |
-
-**判断标准**：如果修改功能 X 需要改动组件 Y 的文件，说明边界划错了。
-
-### 图标使用规范（核心铁律第4条展开）
-
-- 禁止在 UI 中使用 Unicode emoji 作为图标（跨平台渲染不一致、不可样式化）
-- 前端项目优先使用 `lucide-vue-next`（与 firewall 保持一致）
-- 编辑器 toolbar 图标可使用内联 SVG
-- 控制台日志允许 emoji 前缀（不影响 UI 渲染）
-- 用户生成内容（如个人简介）中 emoji 不在此限制范围内
-
----
+6. **每个函数写文档注释**；注释和文档用简体中文，必须含参数和返回值说明。
+7. **错误处理**：不吞噬异常，所有错误必须被捕获并记录日志。
+8. **每次修改代码后主动提交 git**，遵守 [git-patterns.md](references/git-patterns.md)。
+9. **开发时关权限**：`requireLogin: false`，功能调通后再加。
+10. **写完 API 必须 curl 验证**：确认返回数据后再写前端。
+11. **外部 API 先 curl 验证格式**：不猜测字段名。
 
 ## AI 行为准则
 
 > 以下规则约束 AI 在修改代码时的行为，防止盲目操作。
 
-| 规则 | 说明 |
-|:---|:---|
-| **先读后改** | 修改任何文件前，必须先 Read 该文件。禁止凭记忆或猜测修改代码 |
-| **不改无关代码** | 只修改任务直接相关的部分，不顺便重构、格式化、优化无关代码 |
-| **不确定先问** | 遇到不确定的业务逻辑（如"这个字段是什么意思"、"这一步是做什么"），先提问再写，不要猜测 |
-| **不删未读内容** | 不要删除未读过的文件内容。如果觉得某段代码多余，先读完整文件再决定 |
-| **改完即验证** | 修改完成后，说明验证方式（运行测试、手动测试步骤等），确保不破坏已有功能 |
+| 规则                   | 说明                                                                     |
+| :--------------------- | :----------------------------------------------------------------------- |
+| **先读后改**           | 修改前先 Read，禁止凭记忆修改代码                                        |
+| **不改无关代码**       | 只改任务相关部分，不顺便重构                                             |
+| **不确定先问**         | 业务逻辑不确定时先提问，不猜测                                           |
+| **不删未读内容**       | 不删除未读过的文件内容                                                   |
+| **KX 先读规范**        | 涉及 KX 架构文件时，先读 [kx.md](references/kx.md) 与 SPEC.md，不凭记忆写 |
+| **禁止假数据**         | 严禁 mock 数据。必须全链路打通：后端 API → 真实数据源 → 前端展示         |
+| **功能完整性**         | 写了页面必须有对应 API，写了 API 必须有对应 DAO/Service，不允许半截功能  |
+| **开发时关权限**       | `requireLogin: false`，功能调通后再恢复                                  |
+| **API 必须 curl 验证** | 写完 API 立即 curl 验证：状态码 + 数据结构 + 边界值                      |
+| **外部 API 先 curl**   | 调用外部 API 前先 curl 确认字段名，不猜测返回格式                        |
+| **追踪调用链**         | 审查代码时追踪 import 依赖和调用方（至少 2 层），不只看单个文件          |
+| **功能一致性**         | 相同功能的不同路径安全级别必须一致（如 HTTP 和 WebSocket 守卫）          |
+| **错误码优先**         | 错误判断用 `err.code`，不用 `err.message.includes()` 匹配文本            |
+| **空值保护**           | 所有嵌套对象访问用可选链 `?.`，逐层保护                                  |
+| **超时保护**           | 所有可能阻塞的异步操作设置超时                                           |
+| **提交后复盘**         | 每次提交后按 [anti-patterns.md](references/anti-patterns.md) 复盘并更新 skill |
 
----
+### 任务执行规范
 
-## 反例速查
-
-| 场景 | ❌ 错误写法 | ✅ 正确做法 |
-|------|-----------|-----------|
-| API 请求 | 组件内直接 `axios.get('/api/users')` | 封装到 `src/api/user.ts`，组件调 `getUser()` |
-| 错误处理 | `catch { /* 吞掉 */ }` | `catch (e) { logger.error(e); throw e }` |
-| 注释 | 只写"做了什么" `// 设置用户名为张三` | 写"为什么" `// 用户未设置昵称时用手机号占位` |
-| 类型 | `const data: any = res.data` | `const data: ApiResult<User> = res.data` |
-| 样式 | 内联 `style="color: red"` | CSS 变量 `var(--color-error)` 或 Tailwind 类 |
-| 数据库 | `WHERE id = ${id}` 拼接 SQL | 参数化 `WHERE id = ?` / Sequelize `where: { id }` |
-| 提交 | `git commit -m "fix bug"` | `git commit -m "fix(login): 修复空指针异常"` |
-| 分支同步 | `git merge develop` 在 feature 分支 | `git rebase develop` 保持线性历史 |
-| 敏感信息 | 代码中硬编码 `apiKey: "sk-xxx"` | 从 `process.env.API_KEY` 读取 |
-| 文件大小 | 一个文件 2000 行不拆分 | 超过 700 行按功能拆分为独立模块 |
-
----
-
-## 规范参考文档
-
-| 规范 | 文件 | 说明 |
-|------|------|------|
-| 📝 注释规范 | [note.md](references/note.md) | 文件头注释、函数注释、行内注释、TODO 标记、控制台日志 |
-| 🏷️ 命名规范 | [naming-convention.md](references/naming-convention.md) | 代码/文件/数据库/权限/API 命名规则 |
-| ⚙️ 后端规范 | [backend/main.md](references/backend/main.md) | 目录结构、API 路由、认证、守卫、数据库 |
-| 🎨 前端规范 | [frontend/main.md](references/frontend/main.md) | 技术栈、组件开发、数据加载、API 响应格式 |
-| 🧪 测试规范 | [testing.md](references/testing.md) | 测试文件命名、Jest/Vitest 模板、覆盖率阈值 |
-| 🔒 安全红线 | [security.md](references/security.md) | 敏感信息、XSS 防护、SQL 注入、权限校验、输入验证 |
-| 🌱 新项目模板 | [new-project.md](references/new-project.md) | 从零创建新项目时的初始化流程 |
-| 🎯 Git 规范 | [git-patterns.md](references/git-patterns.md) | 分支模型、提交信息、PR 模板、版本号 |
-
----
+1. **拆解任务** — 将用户需求拆分为可执行步骤（`任务1`、`任务2`...，可再拆 `1.1`/`1.2`）
+2. **逐项执行** — 按顺序完成，完成后标记 `✅` 并简要说明结果
+3. **每步确认** — 关键节点（架构、破坏性改动）等待用户确认
 
 ## 修复问题原则
 
 **先分析再修改**，禁止盲目尝试：
 
-1. **定位根因** — 看日志错误栈 → 检查代码流程 → 复现最小步骤 → 必要时 git blame 了解改动意图
-2. **明确原因** — 确认是逻辑错误、边界条件、还是外部依赖问题
-3. **动手改** — 只改必要代码，不顺便重构无关逻辑
-4. **验证** — 确认修复有效且不破坏相关功能
+1. **定位根因** — 看日志错误栈 → 检查代码流程 → 复现最小步骤 → 必要时 git blame
+2. **追踪调用链** — 检查 import 依赖和调用方（至少 2 层）
+3. **明确原因** — 确认是逻辑错误、边界条件、还是外部依赖问题
+4. **对照清单** — 执行企业级审查清单（[anti-patterns.md](references/anti-patterns.md)）
+5. **动手改** — 只改必要代码，不顺便重构无关逻辑
+6. **验证** — 确认修复有效且不破坏相关功能
 
----
+## 内置检查清单（每次输出代码前自动执行）
 
-## Output Format (输出要求)
+```
+[ ] 本次涉及新项目/新 App？→ 已走 requirement-intake.md 流程（需求文档 + 多轮确认 + KX）
+[ ] 本次涉及外部 API？→ 已先 curl 验证格式
+[ ] 本次涉及后端 API？→ 已 curl 验证返回数据
+[ ] 本次涉及前端页面？→ 对应的 KX 描述和后端 API 已存在
+[ ] 是否有任何假数据？→ 全部替换为真实数据源
+[ ] 功能是否完整？→ 后端 API + 前端调用 + 数据展示，全链路打通
+[ ] 开发时权限是否已关闭？→ requireLogin: false
+[ ] KX 语法检查 → 已对照 references/kx.md 写作规范表
+[ ] KX 引用检查 → 页面文件顶部有 @ref 引用模型
+[ ] KX 组件检查 → 复杂组件有 @prop 接口定义，非仅 @note 描述
+```
 
-1. **思考过程**: 在写代码前，先简要分析需求并列出实现步骤。
-2. **代码输出**: 
-   - 每次只输出必要的文件，并在代码块上方标注完整的文件路径（例如：`src/components/Button.tsx`）。
-   - 代码必须完整，不要使用 `// ... existing code ...` 这种省略号敷衍。
-3. **依赖说明**: 如果引入了新的第三方包，请在最后列出安装命令（如 `npm install xxx`）。
-4. **修改后验证**: 简述验证方式（运行测试 / 手动测试步骤等），确保改动正确。
+## 输出要求
+
+1. **任务计划**：接到任务先输出拆解列表（`── 任务拆解 ──` 格式），等待用户确认后再写代码。
+2. **思考过程**：写代码前简要分析需求并列出实现步骤。
+3. **代码输出**：每次只输出必要文件，代码块上方标注完整文件路径；代码必须完整，禁止 `// ... existing code ...` 省略。
+4. **依赖说明**：引入新第三方包时列出安装命令。
+
+## 规范参考文档（按需加载）
+
+| 时机                     | 文件                                              | 说明                                            |
+| ------------------------ | ------------------------------------------------- | ----------------------------------------------- |
+| 写注释/日志时            | [note.md](references/note.md)                     | 文件头注释、函数注释、TODO 标记、控制台日志     |
+| 命名犹豫时               | [naming-convention.md](references/naming-convention.md) | 代码/文件/数据库/权限/API 命名规则        |
+| 写后端代码时             | [backend/main.md](references/backend/main.md)     | 目录结构、API 路由、认证、守卫、数据库索引页    |
+| 写 Redis 代码时          | [backend/redis.md](references/backend/redis.md)   | 数据结构选型、键命名、大 Key 治理、禁用命令     |
+| 写 Fastify 路由/DAO 时   | [nodejs-fastify.md](references/backend/nodejs/nodejs-fastify.md) | registerSecureRoute/DAO/模型/迁移模板 |
+| 写前端代码时             | [frontend/main.md](references/frontend/main.md)   | 技术栈索引、组件开发、数据加载、API 响应格式    |
+| 写 Vue 组件时            | [frontend/web/vue.md](references/frontend/web/vue.md) | TS 配置、Axios、认证、路由守卫、目录规范    |
+| 写测试时                 | [testing.md](references/testing.md)               | 测试命名、Jest/Vitest 模板、覆盖率阈值          |
+| 涉及安全/敏感数据时      | [security.md](references/security.md)             | 敏感信息、XSS、SQL 注入、权限校验、仓库防线一览 |
+| 需要专项深度执行时       | [orchestration.md](references/orchestration.md)   | 编排安全测试/UI 设计/Redis 等其他 skill（决策表 + 推荐目录 + AI 自安装） |
+| 跑检查/验证时            | [toolbox.md](references/toolbox.md)               | 检查金字塔、场景化命令矩阵、提交前清单          |
+| 新项目/新 App            | [requirement-intake.md](references/requirement-intake.md) → [kx.md](references/kx.md) | 需求确认流程 → KX 语法规范 |
+| 涉及 KX / .kx 文件       | [kx.md](references/kx.md) → [SPEC.md](assets/project-template/kt/kx-lang/SPEC.md) | 操作规范 → 完整语法与 AI 生成映射表 |
+| Git 操作                 | [git-patterns.md](references/git-patterns.md)     | 分支模型、提交信息、PR 模板、版本号             |
+| 修复 Bug / 防踩坑        | [pitfalls.md](references/pitfalls.md)             | 项目真实事故复盘库（现象→根因→规则→防回归）     |
+| 端到端任务执行           | [workflows.md](references/workflows.md)           | 六大任务剧本（API/页面/外部接口/Bug/审查/安全） |
+| 审查代码 / 修复问题      | [anti-patterns.md](references/anti-patterns.md) → [code-review.md](references/code-review.md) | 反例速查 + 审查清单 → 完整展开 |
