@@ -4,6 +4,27 @@
 
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [2.3.0] - 2026-09-05
+
+### 新增
+
+- **分层加载架构**：SKILL.md 瘦身为 129 行核心层，低频内容下沉 16 个按需 references（日常会话省 4-6k token）
+- **端到端任务剧本**（workflows.md）：六大剧本——新增 API / 新增页面 / 对接外部 API / 修复 Bug / 代码审查 / 安全审查
+- **事故复盘库**（pitfalls.md）：12 条真实生产事故（现象→根因→规则→防回归），含设备 ID 算法漂移、路由重复注册、401 刷新死锁、SSO 主题竞态等
+- **技能编排规范**（orchestration.md）：11 场景决策表，可调度安全测试 / UI 设计 / Redis 等环境内其他专项技能，含降级容错
+- **代码检查工具箱**（toolbox.md）：检查金字塔 + 场景化命令矩阵 + 提交前最终清单
+- **doctor.mjs 自检脚本**：链接可达性 / 禁用模式 / 行数上限 / 必需文件的机器校验
+- **双语仓库文档**：README.md（English）+ README.zh-CN.md（简体中文）
+- **MIT LICENSE**
+
+### 修复
+
+- 路径全面对齐：`src/db|redis|auth` → `src/framework/*`（7 个 references + AGENTS.md/CLAUDE.md 同步）
+- 模板矛盾：DAO `sequelize.models` → `getModel`（对齐铁律）；`reply.result.success` 签名对齐真实装饰器
+- 删除虚构 Jest 配置项 `setupFilesAfterSetup`；testMatch 对齐仓库实际
+- 断链修复（vue.md 层级、security.md 链接）；naming-convention 破损表格重写；new-project 步骤编号修正
+- assets 移除嵌套 .git 与重复 README，保留 SPEC.md + example.kx
+
 ## [1.1.1] - 2026-07-21
 
 ### 修复
